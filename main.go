@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("chat：你好！有什么可以帮助您的吗？")
+	fmt.Println("chat：你好！我是zq的ai助手！有什么可以帮助您的吗？")
 	var parentMessageId string
 	for {
 		var input string
