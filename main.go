@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -14,8 +17,16 @@ func main() {
 	var parentMessageId string
 	for {
 		var input string
-		fmt.Print("> ")
-		fmt.Scanln(&input)
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("你：")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			panic(err)
+		}
+		input = strings.TrimSpace(input)
+		sig := make(chan bool)
+		go spinner(time.Duration(time.Millisecond*40), sig)
+		// fmt.Scanln(&input)
 		url := "https://www.muzjia.com/api/chat-process"
 		// 创建请求体
 		options := map[string]string{
@@ -31,7 +42,23 @@ func main() {
 		}
 		messages := httpPost(url, requestBody)
 		parentMessageId = messages[len(messages)-1].ParentMessageId
-		fmt.Println("chat：", messages[len(messages)-1].Text)
+		sig <- true
+		fmt.Println("\rchat：", messages[len(messages)-1].Text)
+	}
+}
+
+func spinner(delay time.Duration, done chan bool) {
+	signs := [6]string{".     ", "..    ", "...   ", "....  ", "..... ", "......"}
+	for {
+		for _, i := range signs {
+			select {
+			case <-done: //通道接收到信号退出
+				return
+			case <-time.After(delay): //在一定时间内没有收到信号
+				fmt.Printf("\rchat：思考中%s", i)
+				time.Sleep(500 * time.Millisecond)
+			}
+		}
 	}
 }
 
