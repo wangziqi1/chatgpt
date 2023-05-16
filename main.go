@@ -14,7 +14,8 @@ import (
 )
 
 func main() {
-	fmt.Println("chat：你好！我是zq的ai助手！有什么可以帮助您的吗？\n")
+	fmt.Println("chat：你好！我是zq的ai助手！有什么可以帮助您的吗？")
+	fmt.Print("\n")
 	var parentMessageId string
 	for {
 		var input string
