@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	fmt.Println("chat：你好！我是zq的ai助手！有什么可以帮助您的吗？")
+	fmt.Println("chat：你好！我是zq的ai助手！有什么可以帮助您的吗？\n")
 	var parentMessageId string
 	for {
 		var input string
@@ -24,6 +25,7 @@ func main() {
 			panic(err)
 		}
 		input = strings.TrimSpace(input)
+		fmt.Print("\n")
 		sig := make(chan bool)
 		go spinner(time.Duration(time.Millisecond*40), sig)
 		// fmt.Scanln(&input)
@@ -44,6 +46,7 @@ func main() {
 		parentMessageId = messages[len(messages)-1].ParentMessageId
 		sig <- true
 		fmt.Println("\rchat：", messages[len(messages)-1].Text)
+		fmt.Print("\n")
 	}
 }
 
@@ -69,7 +72,12 @@ type Message struct {
 
 // 发送 POST 请求
 func httpPost(url string, requestBody []byte) []Message {
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	// Create a new HTTP client with InsecureSkipVerify set to true
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	response, err := client.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		panic(err)
 	}
